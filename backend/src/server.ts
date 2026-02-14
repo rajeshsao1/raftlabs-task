@@ -39,9 +39,19 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 // API Routes
 app.use('/api/menu', menuRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/menu', menuRoutes);
+app.use('/orders', orderRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req: Request, res: Response) => {
+  res.json({
+    success: true,
+    message: 'FoodHub API is running',
+    timestamp: new Date().toISOString(),
+  });
+});
+
+app.get('/health', (req: Request, res: Response) => {
   res.json({
     success: true,
     message: 'FoodHub API is running',
