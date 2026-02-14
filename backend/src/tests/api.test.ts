@@ -65,13 +65,16 @@ describe('Menu API', () => {
   });
 });
 
-describe('Order API', () => {
-  beforeEach(() => {
-    orderStore.clearAll();
+const mongoEnabled = Boolean(process.env.MONGODB_URI);
+const orderDescribe = mongoEnabled ? describe : describe.skip;
+
+orderDescribe('Order API', () => {
+  beforeEach(async () => {
+    await orderStore.clearAll();
   });
 
-  afterEach(() => {
-    orderStore.clearAll();
+  afterEach(async () => {
+    await orderStore.clearAll();
   });
 
   const validOrderData = {

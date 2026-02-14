@@ -4,17 +4,18 @@ A RESTful API for the FoodHub food delivery application built with Node.js and E
 
 ## Features
 
-- 🍕 Menu management with categories
-- 📦 Order placement and tracking
-- 🚚 Real-time order status simulation
-- ✅ Input validation
-- 🧪 Comprehensive test coverage
+- Menu management with categories
+- Order placement and tracking (persisted in MongoDB)
+- Automatic order status progression based on timestamps
+- Input validation
+- Comprehensive test coverage
 
 ## Tech Stack
 
 - **Runtime**: Node.js
 - **Framework**: Express.js
 - **Language**: TypeScript
+- **Database**: MongoDB
 - **Testing**: Vitest + Supertest
 
 ## Getting Started
@@ -23,6 +24,7 @@ A RESTful API for the FoodHub food delivery application built with Node.js and E
 
 - Node.js 18+
 - npm or yarn
+- MongoDB (local or Atlas)
 
 ### Installation
 
@@ -93,11 +95,11 @@ npm run test:watch
 
 Orders follow a sequential status progression:
 
-1. `pending` → Order received
-2. `confirmed` → Restaurant confirmed
-3. `preparing` → Food being prepared
-4. `out_for_delivery` → On the way
-5. `delivered` → Order completed
+1. `pending` -> Order received
+2. `confirmed` -> Restaurant confirmed
+3. `preparing` -> Food being prepared
+4. `out_for_delivery` -> On the way
+5. `delivered` -> Order completed
 
 ## Request/Response Examples
 
@@ -136,9 +138,9 @@ Orders follow a sequential status progression:
   "success": true,
   "data": {
     "id": "ORD-1701234567890-abc12345",
-    "items": [...],
+    "items": [],
     "total": 29.98,
-    "deliveryDetails": {...},
+    "deliveryDetails": {},
     "status": "pending",
     "createdAt": "2024-01-01T12:00:00.000Z",
     "estimatedDelivery": "30-45 min"
@@ -157,15 +159,15 @@ Orders follow a sequential status progression:
 }
 ```
 
-## Real-time Status Updates
+## Status Updates
 
-The backend automatically simulates order status progression:
+The backend derives order status progression from the order's `createdAt` timestamp:
 
-- Order created → `pending`
-- +5 seconds → `confirmed`
-- +10 seconds → `preparing`
-- +15 seconds → `out_for_delivery`
-- +20 seconds → `delivered`
+- Order created -> `pending`
+- +5 seconds -> `confirmed`
+- +10 seconds -> `preparing`
+- +15 seconds -> `out_for_delivery`
+- +20 seconds -> `delivered`
 
 Poll the `/api/orders/:id/status-updates` endpoint to get the update history.
 
@@ -173,28 +175,31 @@ Poll the `/api/orders/:id/status-updates` endpoint to get the update history.
 
 ```
 backend/
-├── src/
-│   ├── data/
-│   │   └── menuItems.ts      # Menu data
-│   ├── routes/
-│   │   ├── menuRoutes.ts     # Menu endpoints
-│   │   └── orderRoutes.ts    # Order endpoints
-│   ├── store/
-│   │   └── orderStore.ts     # In-memory order storage
-│   ├── tests/
-│   │   └── api.test.ts       # API tests
-│   ├── types/
-│   │   └── index.ts          # TypeScript types
-│   └── server.ts             # Express server
-├── package.json
-├── tsconfig.json
-└── vitest.config.ts
+|-- src/
+|   |-- data/
+|   |   `-- menuItems.ts      # Menu data
+|   |-- db/
+|   |   `-- mongo.ts          # MongoDB connection
+|   |-- routes/
+|   |   |-- menuRoutes.ts     # Menu endpoints
+|   |   `-- orderRoutes.ts    # Order endpoints
+|   |-- store/
+|   |   `-- orderStore.ts     # MongoDB-backed order storage
+|   |-- tests/
+|   |   `-- api.test.ts       # API tests
+|   |-- types/
+|   |   `-- index.ts          # TypeScript types
+|   `-- server.ts             # Express server
+|-- package.json
+|-- tsconfig.json
+`-- vitest.config.ts
 ```
 
 ## Environment Variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
+| MONGODB_URI | (required) | MongoDB connection string |
 | PORT | 3001 | Server port |
 | NODE_ENV | development | Environment |
 

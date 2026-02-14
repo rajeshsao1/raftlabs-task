@@ -7,18 +7,20 @@ import { OrderTrackingView } from '@/components/OrderTrackingView';
 
 export function App() {
   const { currentView } = useStore();
-  
+  const apiBaseUrl = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:3001/api';
+  const backendBaseUrl = apiBaseUrl.replace(/\/api\/?$/, '');
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <main>
         {currentView === 'menu' && <MenuView />}
         {currentView === 'cart' && <CartView />}
         {currentView === 'checkout' && <CheckoutView />}
         {currentView === 'tracking' && <OrderTrackingView />}
       </main>
-      
+
       {/* Footer */}
       <footer className="bg-white border-t border-gray-100 py-8 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -32,8 +34,8 @@ export function App() {
 
             {/* Task completed by Rajesh Kumar (rajeshsao91@gmail.com) */}
             <p className="text-gray-500 text-sm text-center">
-              © 2026 FoodHub. Task completed by{' '}
-              <span className="font-medium text-gray-700">Rajesh Kumar</span> —{' '}
+              (c) 2026 FoodHub. Task completed by{' '}
+              <span className="font-medium text-gray-700">Rajesh Kumar</span> -{' '}
               <a
                 href="mailto:rajeshsao91@gmail.com"
                 className="text-gray-600 hover:text-gray-800 underline underline-offset-2"
@@ -44,7 +46,7 @@ export function App() {
 
             <div className="flex items-center gap-4">
               <a
-                href="http://localhost:3001/api/health"
+                href={`${apiBaseUrl}/health`}
                 target="_blank"
                 rel="noreferrer"
                 className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -52,7 +54,7 @@ export function App() {
                 Site Health
               </a>
               <a
-                href="http://localhost:3001/"
+                href={backendBaseUrl}
                 target="_blank"
                 rel="noreferrer"
                 className="text-gray-400 hover:text-gray-600 transition-colors"

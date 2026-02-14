@@ -78,8 +78,11 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`\n  FoodHub API Server is running!\n\n  Local:    http://localhost:${PORT}\n  Health:   http://localhost:${PORT}/api/health\n  API Docs: http://localhost:${PORT}/\n\n  Ready to accept requests...\n  `);
-});
+if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`\n  FoodHub API Server is running!\n\n  Local:    http://localhost:${PORT}\n  Health:   http://localhost:${PORT}/api/health\n  API Docs: http://localhost:${PORT}/\n\n  Ready to accept requests...\n  `);
+  });
+}
 
 export default app;
+module.exports = app;

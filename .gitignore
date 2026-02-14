@@ -4,5 +4,7 @@
 node_modules/
 npm-debug.log*
 
+.env
+
 # Backend node modules
 backend/node_modules/

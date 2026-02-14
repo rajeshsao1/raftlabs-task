@@ -58,7 +58,7 @@ The frontend calls the backend using:
 
 - `VITE_API_BASE_URL`
   - Default in development: `http://localhost:3001/api`
-  - Default in production: `/api` (same domain on Vercel)
+  - Recommended in production: the deployed backend URL (for example, `https://your-backend.vercel.app/api`)
 
 Create a `.env` file in `frontend/` to override it:
 

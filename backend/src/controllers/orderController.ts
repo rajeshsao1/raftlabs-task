@@ -43,146 +43,191 @@ function validateCartItems(items: any[]): { valid: boolean; errors: string[] } {
   return { valid: errors.length === 0, errors };
 }
 
-export const getAllOrders = (req: Request, res: Response) => {
-  const orders = orderStore.getAllOrders();
+export const getAllOrders = async (req: Request, res: Response) => {
+  try {
+    const orders = await orderStore.getAllOrders();
 
-  const response: ApiResponse<Order[]> = {
-    success: true,
-    data: orders,
-  };
+    const response: ApiResponse<Order[]> = {
+      success: true,
+      data: orders,
+    };
 
-  res.json(response);
+    res.json(response);
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch orders',
+      message: process.env.NODE_ENV === 'development' ? error?.message : undefined,
+    });
+  }
 };
 
-export const getOrder = (req: Request, res: Response) => {
-  const { id } = req.params;
-  const order = orderStore.getOrder(id);
+export const getOrder = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const order = await orderStore.getOrder(id);
 
-  if (!order) {
-    const response: ApiResponse<null> = {
-      success: false,
-      error: 'Order not found',
+    if (!order) {
+      const response: ApiResponse<null> = {
+        success: false,
+        error: 'Order not found',
+      };
+      return res.status(404).json(response);
+    }
+
+    const response: ApiResponse<Order> = {
+      success: true,
+      data: order,
     };
-    return res.status(404).json(response);
+
+    res.json(response);
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch order',
+      message: process.env.NODE_ENV === 'development' ? error?.message : undefined,
+    });
   }
-
-  const response: ApiResponse<Order> = {
-    success: true,
-    data: order,
-  };
-
-  res.json(response);
 };
 
-export const createOrder = (req: Request, res: Response) => {
-  const { items, deliveryDetails } = req.body as CreateOrderRequest;
+export const createOrder = async (req: Request, res: Response) => {
+  try {
+    const { items, deliveryDetails } = req.body as CreateOrderRequest;
 
-  const itemsValidation = validateCartItems(items);
-  if (!itemsValidation.valid) {
-    const response: ApiResponse<null> = {
-      success: false,
-      error: itemsValidation.errors.join(', '),
+    const itemsValidation = validateCartItems(items);
+    if (!itemsValidation.valid) {
+      const response: ApiResponse<null> = {
+        success: false,
+        error: itemsValidation.errors.join(', '),
+      };
+      return res.status(400).json(response);
+    }
+
+    const deliveryValidation = validateDeliveryDetails(deliveryDetails);
+    if (!deliveryValidation.valid) {
+      const response: ApiResponse<null> = {
+        success: false,
+        error: deliveryValidation.errors.join(', '),
+      };
+      return res.status(400).json(response);
+    }
+
+    const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+    const order = await orderStore.createOrder({
+      items,
+      total,
+      deliveryDetails,
+      estimatedDelivery: '30-45 min',
+    });
+
+    const response: ApiResponse<Order> = {
+      success: true,
+      data: order,
+      message: 'Order placed successfully',
     };
-    return res.status(400).json(response);
-  }
 
-  const deliveryValidation = validateDeliveryDetails(deliveryDetails);
-  if (!deliveryValidation.valid) {
-    const response: ApiResponse<null> = {
+    res.status(201).json(response);
+  } catch (error: any) {
+    res.status(500).json({
       success: false,
-      error: deliveryValidation.errors.join(', '),
-    };
-    return res.status(400).json(response);
+      error: 'Failed to create order',
+      message: process.env.NODE_ENV === 'development' ? error?.message : undefined,
+    });
   }
-
-  const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-  const order = orderStore.createOrder({
-    items,
-    total,
-    deliveryDetails,
-    estimatedDelivery: '30-45 min',
-  });
-
-  const response: ApiResponse<Order> = {
-    success: true,
-    data: order,
-    message: 'Order placed successfully',
-  };
-
-  res.status(201).json(response);
 };
 
-export const updateOrderStatus = (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { status } = req.body as UpdateOrderStatusRequest;
+export const updateOrderStatus = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body as UpdateOrderStatusRequest;
 
-  const validStatuses = ['pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered'];
-  if (!status || !validStatuses.includes(status)) {
-    const response: ApiResponse<null> = {
-      success: false,
-      error: 'Invalid status. Must be one of: ' + validStatuses.join(', '),
+    const validStatuses = ['pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered'];
+    if (!status || !validStatuses.includes(status)) {
+      const response: ApiResponse<null> = {
+        success: false,
+        error: 'Invalid status. Must be one of: ' + validStatuses.join(', '),
+      };
+      return res.status(400).json(response);
+    }
+
+    const updatedOrder = await orderStore.updateOrderStatus(id, status);
+
+    if (!updatedOrder) {
+      const response: ApiResponse<null> = {
+        success: false,
+        error: 'Order not found or invalid status transition',
+      };
+      return res.status(400).json(response);
+    }
+
+    const response: ApiResponse<Order> = {
+      success: true,
+      data: updatedOrder,
+      message: 'Order status updated',
     };
-    return res.status(400).json(response);
-  }
 
-  const updatedOrder = orderStore.updateOrderStatus(id, status);
-
-  if (!updatedOrder) {
-    const response: ApiResponse<null> = {
+    res.json(response);
+  } catch (error: any) {
+    res.status(500).json({
       success: false,
-      error: 'Order not found or invalid status transition',
-    };
-    return res.status(400).json(response);
+      error: 'Failed to update order status',
+      message: process.env.NODE_ENV === 'development' ? error?.message : undefined,
+    });
   }
-
-  const response: ApiResponse<Order> = {
-    success: true,
-    data: updatedOrder,
-    message: 'Order status updated',
-  };
-
-  res.json(response);
 };
 
-export const getStatusUpdates = (req: Request, res: Response) => {
-  const { id } = req.params;
-  const order = orderStore.getOrder(id);
+export const getStatusUpdates = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const updates = await orderStore.getStatusUpdates(id);
+    if (!updates) {
+      const response: ApiResponse<null> = {
+        success: false,
+        error: 'Order not found',
+      };
+      return res.status(404).json(response);
+    }
 
-  if (!order) {
-    const response: ApiResponse<null> = {
-      success: false,
-      error: 'Order not found',
+    const response: ApiResponse<StatusUpdate[]> = {
+      success: true,
+      data: updates,
     };
-    return res.status(404).json(response);
+
+    res.json(response);
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch status updates',
+      message: process.env.NODE_ENV === 'development' ? error?.message : undefined,
+    });
   }
-
-  const updates = orderStore.getStatusUpdates(id);
-
-  const response: ApiResponse<StatusUpdate[]> = {
-    success: true,
-    data: updates,
-  };
-
-  res.json(response);
 };
 
-export const deleteOrder = (req: Request, res: Response) => {
-  const { id } = req.params;
-  const deleted = orderStore.deleteOrder(id);
+export const deleteOrder = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const deleted = await orderStore.deleteOrder(id);
 
-  if (!deleted) {
+    if (!deleted) {
+      const response: ApiResponse<null> = {
+        success: false,
+        error: 'Order not found',
+      };
+      return res.status(404).json(response);
+    }
+
     const response: ApiResponse<null> = {
-      success: false,
-      error: 'Order not found',
+      success: true,
+      message: 'Order deleted successfully',
     };
-    return res.status(404).json(response);
+
+    res.json(response);
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: 'Failed to delete order',
+      message: process.env.NODE_ENV === 'development' ? error?.message : undefined,
+    });
   }
-
-  const response: ApiResponse<null> = {
-    success: true,
-    message: 'Order deleted successfully',
-  };
-
-  res.json(response);
 };
