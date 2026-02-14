@@ -6,18 +6,8 @@ import orderRoutes from './routes/orderRoutes';
 const app: Application = express();
 const PORT = process.env.PORT || 3001;
 
-const corsOrigins = process.env.CORS_ORIGIN
-  ? process.env.CORS_ORIGIN.split(',').map((origin) => origin.trim()).filter(Boolean)
-  : ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:4173'];
-
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || corsOrigins.includes(origin)) {
-      callback(null, true);
-      return;
-    }
-    callback(new Error('Not allowed by CORS'));
-  },
+  origin: true,
   credentials: true,
 }));
 app.use(express.json());
