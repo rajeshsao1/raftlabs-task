@@ -13,7 +13,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss(), viteSingleFile()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "frontend"),
+      "@": path.resolve(__dirname, "src"),
     },
   },
 });
