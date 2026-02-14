@@ -3,15 +3,21 @@ declare class OrderStore {
     private orders;
     private statusUpdates;
     private statusTimers;
-    createOrder(orderData: Omit<Order, 'id' | 'createdAt' | 'status'>): Order;
-    getOrder(id: string): Order | undefined;
-    getAllOrders(): Order[];
-    updateOrderStatus(id: string, status: OrderStatus): Order | undefined;
+    private getOrderIds;
+    private setOrderIds;
+    private saveOrder;
+    private saveUpdates;
+    private getStoredOrder;
+    private getStoredUpdates;
+    createOrder(orderData: Omit<Order, 'id' | 'createdAt' | 'status'>): Promise<Order>;
+    getOrder(id: string): Promise<Order | undefined>;
+    getAllOrders(): Promise<Order[]>;
+    updateOrderStatus(id: string, status: OrderStatus): Promise<Order | undefined>;
     private initializeStatusUpdates;
     private addStatusUpdate;
-    getStatusUpdates(orderId: string): StatusUpdate[];
-    clearAll(): void;
-    deleteOrder(id: string): boolean;
+    getStatusUpdates(orderId: string): Promise<StatusUpdate[]>;
+    clearAll(): Promise<void>;
+    deleteOrder(id: string): Promise<boolean>;
 }
 export declare const orderStore: OrderStore;
 export {};

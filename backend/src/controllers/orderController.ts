@@ -46,8 +46,8 @@ function validateCartItems(items: any[]): { valid: boolean; errors: string[] } {
 }
 
 // GET /api/orders - Get all orders
-export const getAllOrders = (req: Request, res: Response) => {
-  const orders = orderStore.getAllOrders();
+export const getAllOrders = async (req: Request, res: Response) => {
+  const orders = await orderStore.getAllOrders();
 
   const response: ApiResponse<Order[]> = {
     success: true,
@@ -58,9 +58,9 @@ export const getAllOrders = (req: Request, res: Response) => {
 };
 
 // GET /api/orders/:id - Get order by ID
-export const getOrder = (req: Request, res: Response) => {
+export const getOrder = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const order = orderStore.getOrder(id);
+  const order = await orderStore.getOrder(id);
 
   if (!order) {
     const response: ApiResponse<null> = {
@@ -79,7 +79,7 @@ export const getOrder = (req: Request, res: Response) => {
 };
 
 // POST /api/orders - Create new order
-export const createOrder = (req: Request, res: Response) => {
+export const createOrder = async (req: Request, res: Response) => {
   const { items, deliveryDetails } = req.body as CreateOrderRequest;
 
   // Validate cart items
@@ -106,7 +106,7 @@ export const createOrder = (req: Request, res: Response) => {
   const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   // Create order
-  const order = orderStore.createOrder({
+  const order = await orderStore.createOrder({
     items,
     total,
     deliveryDetails,
@@ -123,7 +123,7 @@ export const createOrder = (req: Request, res: Response) => {
 };
 
 // PUT /api/orders/:id/status - Update order status
-export const updateOrderStatus = (req: Request, res: Response) => {
+export const updateOrderStatus = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { status } = req.body as UpdateOrderStatusRequest;
 
@@ -138,7 +138,7 @@ export const updateOrderStatus = (req: Request, res: Response) => {
   }
 
   // Update status
-  const updatedOrder = orderStore.updateOrderStatus(id, status);
+  const updatedOrder = await orderStore.updateOrderStatus(id, status);
 
   if (!updatedOrder) {
     const response: ApiResponse<null> = {
@@ -158,9 +158,9 @@ export const updateOrderStatus = (req: Request, res: Response) => {
 };
 
 // GET /api/orders/:id/status-updates - Get status updates for an order
-export const getStatusUpdates = (req: Request, res: Response) => {
+export const getStatusUpdates = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const order = orderStore.getOrder(id);
+  const order = await orderStore.getOrder(id);
 
   if (!order) {
     const response: ApiResponse<null> = {
@@ -170,7 +170,7 @@ export const getStatusUpdates = (req: Request, res: Response) => {
     return res.status(404).json(response);
   }
 
-  const updates = orderStore.getStatusUpdates(id);
+  const updates = await orderStore.getStatusUpdates(id);
 
   const response: ApiResponse<StatusUpdate[]> = {
     success: true,
@@ -181,9 +181,9 @@ export const getStatusUpdates = (req: Request, res: Response) => {
 };
 
 // DELETE /api/orders/:id - Delete an order (for testing/admin)
-export const deleteOrder = (req: Request, res: Response) => {
+export const deleteOrder = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const deleted = orderStore.deleteOrder(id);
+  const deleted = await orderStore.deleteOrder(id);
 
   if (!deleted) {
     const response: ApiResponse<null> = {

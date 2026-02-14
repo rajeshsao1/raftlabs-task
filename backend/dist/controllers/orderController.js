@@ -40,8 +40,8 @@ function validateCartItems(items) {
     return { valid: errors.length === 0, errors };
 }
 // GET /api/orders - Get all orders
-const getAllOrders = (req, res) => {
-    const orders = orderStore_1.orderStore.getAllOrders();
+const getAllOrders = async (req, res) => {
+    const orders = await orderStore_1.orderStore.getAllOrders();
     const response = {
         success: true,
         data: orders
@@ -50,9 +50,9 @@ const getAllOrders = (req, res) => {
 };
 exports.getAllOrders = getAllOrders;
 // GET /api/orders/:id - Get order by ID
-const getOrder = (req, res) => {
+const getOrder = async (req, res) => {
     const { id } = req.params;
-    const order = orderStore_1.orderStore.getOrder(id);
+    const order = await orderStore_1.orderStore.getOrder(id);
     if (!order) {
         const response = {
             success: false,
@@ -68,7 +68,7 @@ const getOrder = (req, res) => {
 };
 exports.getOrder = getOrder;
 // POST /api/orders - Create new order
-const createOrder = (req, res) => {
+const createOrder = async (req, res) => {
     const { items, deliveryDetails } = req.body;
     // Validate cart items
     const itemsValidation = validateCartItems(items);
@@ -91,7 +91,7 @@ const createOrder = (req, res) => {
     // Calculate total
     const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     // Create order
-    const order = orderStore_1.orderStore.createOrder({
+    const order = await orderStore_1.orderStore.createOrder({
         items,
         total,
         deliveryDetails,
@@ -106,7 +106,7 @@ const createOrder = (req, res) => {
 };
 exports.createOrder = createOrder;
 // PUT /api/orders/:id/status - Update order status
-const updateOrderStatus = (req, res) => {
+const updateOrderStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
     // Validate status
@@ -119,7 +119,7 @@ const updateOrderStatus = (req, res) => {
         return res.status(400).json(response);
     }
     // Update status
-    const updatedOrder = orderStore_1.orderStore.updateOrderStatus(id, status);
+    const updatedOrder = await orderStore_1.orderStore.updateOrderStatus(id, status);
     if (!updatedOrder) {
         const response = {
             success: false,
@@ -136,9 +136,9 @@ const updateOrderStatus = (req, res) => {
 };
 exports.updateOrderStatus = updateOrderStatus;
 // GET /api/orders/:id/status-updates - Get status updates for an order
-const getStatusUpdates = (req, res) => {
+const getStatusUpdates = async (req, res) => {
     const { id } = req.params;
-    const order = orderStore_1.orderStore.getOrder(id);
+    const order = await orderStore_1.orderStore.getOrder(id);
     if (!order) {
         const response = {
             success: false,
@@ -146,7 +146,7 @@ const getStatusUpdates = (req, res) => {
         };
         return res.status(404).json(response);
     }
-    const updates = orderStore_1.orderStore.getStatusUpdates(id);
+    const updates = await orderStore_1.orderStore.getStatusUpdates(id);
     const response = {
         success: true,
         data: updates
@@ -155,9 +155,9 @@ const getStatusUpdates = (req, res) => {
 };
 exports.getStatusUpdates = getStatusUpdates;
 // DELETE /api/orders/:id - Delete an order (for testing/admin)
-const deleteOrder = (req, res) => {
+const deleteOrder = async (req, res) => {
     const { id } = req.params;
-    const deleted = orderStore_1.orderStore.deleteOrder(id);
+    const deleted = await orderStore_1.orderStore.deleteOrder(id);
     if (!deleted) {
         const response = {
             success: false,
