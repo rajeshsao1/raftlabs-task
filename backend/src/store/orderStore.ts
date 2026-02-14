@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 class OrderStore {
   private orders: Map<string, Order> = new Map();
   private statusUpdates: Map<string, StatusUpdate[]> = new Map();
-  private statusTimers: Map<string, NodeJS.Timeout> = new Map();
+  private statusTimers: Map<string, NodeJS.Timeout[]> = new Map();
 
   // Create a new order
   createOrder(orderData: Omit<Order, 'id' | 'createdAt' | 'status'>): Order {
@@ -73,8 +73,8 @@ class OrderStore {
       }, delays[index]);
 
       // Store timer for potential cleanup
-      const existingTimers = this.statusTimers.get(orderId) || [] as any;
-      this.statusTimers.set(orderId, [...existingTimers, timer] as any);
+      const existingTimers = this.statusTimers.get(orderId) || [];
+      this.statusTimers.set(orderId, [...existingTimers, timer]);
     });
   }
 
@@ -110,7 +110,7 @@ class OrderStore {
     this.orders.clear();
     this.statusUpdates.clear();
     this.statusTimers.forEach(timers => {
-      (timers as any[]).forEach(timer => clearTimeout(timer));
+      timers.forEach(timer => clearTimeout(timer));
     });
     this.statusTimers.clear();
   }
@@ -123,7 +123,7 @@ class OrderStore {
     
     const timers = this.statusTimers.get(id);
     if (timers) {
-      (timers as any[]).forEach(timer => clearTimeout(timer));
+      timers.forEach(timer => clearTimeout(timer));
       this.statusTimers.delete(id);
     }
     
