@@ -56,7 +56,9 @@ npm run preview
 
 The frontend calls the backend using:
 
-- `VITE_API_BASE_URL` (default: `http://localhost:3001/api`)
+- `VITE_API_BASE_URL`
+  - Default in development: `http://localhost:3001/api`
+  - Default in production: `/api` (same domain on Vercel)
 
 Create a `.env` file in `frontend/` to override it:
 
