@@ -2,6 +2,7 @@ import express, { Application, NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import menuRoutes from './routes/menuRoutes';
 import orderRoutes from './routes/orderRoutes';
+import { getCategories } from './controllers/menuController';
 
 const app: Application = express();
 const PORT = process.env.PORT || 3001;
@@ -37,6 +38,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 // API Routes
+app.get('/api/menu/categories', getCategories);
+app.get('/menu/categories', getCategories);
 app.use('/api/menu', menuRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/menu', menuRoutes);
