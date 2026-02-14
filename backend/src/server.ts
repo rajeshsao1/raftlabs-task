@@ -3,6 +3,14 @@ import cors from 'cors';
 import menuRoutes from './routes/menuRoutes';
 import orderRoutes from './routes/orderRoutes';
 import { getCategories } from './controllers/menuController';
+import {
+  createOrder,
+  deleteOrder,
+  getAllOrders,
+  getOrder,
+  getStatusUpdates,
+  updateOrderStatus,
+} from './controllers/orderController';
 
 const app: Application = express();
 const PORT = process.env.PORT || 3001;
@@ -56,6 +64,20 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 // API Routes
 app.get('/api/menu/categories', getCategories);
 app.get('/menu/categories', getCategories);
+app.get('/api/orders', getAllOrders);
+app.post('/api/orders', createOrder);
+app.get('/api/orders/:id', getOrder);
+app.put('/api/orders/:id/status', updateOrderStatus);
+app.get('/api/orders/:id/status-updates', getStatusUpdates);
+app.delete('/api/orders/:id', deleteOrder);
+
+app.get('/orders', getAllOrders);
+app.post('/orders', createOrder);
+app.get('/orders/:id', getOrder);
+app.put('/orders/:id/status', updateOrderStatus);
+app.get('/orders/:id/status-updates', getStatusUpdates);
+app.delete('/orders/:id', deleteOrder);
+
 app.use('/api/menu', menuRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/menu', menuRoutes);
