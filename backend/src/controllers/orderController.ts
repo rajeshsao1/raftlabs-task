@@ -1,8 +1,7 @@
 import { Request, Response } from 'express';
 import { orderStore } from '../store/orderStore';
-import { ApiResponse, Order, CreateOrderRequest, UpdateOrderStatusRequest, StatusUpdate, CartItem } from '../types';
+import { ApiResponse, Order, CreateOrderRequest, UpdateOrderStatusRequest, StatusUpdate } from '../types';
 
-// Validation helper
 function validateDeliveryDetails(details: any): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
 
@@ -20,7 +19,6 @@ function validateDeliveryDetails(details: any): { valid: boolean; errors: string
       errors.push('Phone number must be exactly 10 digits');
     }
   }
-  // Email is intentionally not collected in this assessment flow
 
   return { valid: errors.length === 0, errors };
 }
@@ -45,105 +43,95 @@ function validateCartItems(items: any[]): { valid: boolean; errors: string[] } {
   return { valid: errors.length === 0, errors };
 }
 
-// GET /api/orders - Get all orders
-export const getAllOrders = async (req: Request, res: Response) => {
-  const orders = await orderStore.getAllOrders();
+export const getAllOrders = (req: Request, res: Response) => {
+  const orders = orderStore.getAllOrders();
 
   const response: ApiResponse<Order[]> = {
     success: true,
-    data: orders
+    data: orders,
   };
 
   res.json(response);
 };
 
-// GET /api/orders/:id - Get order by ID
-export const getOrder = async (req: Request, res: Response) => {
+export const getOrder = (req: Request, res: Response) => {
   const { id } = req.params;
-  const order = await orderStore.getOrder(id);
+  const order = orderStore.getOrder(id);
 
   if (!order) {
     const response: ApiResponse<null> = {
       success: false,
-      error: 'Order not found'
+      error: 'Order not found',
     };
     return res.status(404).json(response);
   }
 
   const response: ApiResponse<Order> = {
     success: true,
-    data: order
+    data: order,
   };
 
   res.json(response);
 };
 
-// POST /api/orders - Create new order
-export const createOrder = async (req: Request, res: Response) => {
+export const createOrder = (req: Request, res: Response) => {
   const { items, deliveryDetails } = req.body as CreateOrderRequest;
 
-  // Validate cart items
   const itemsValidation = validateCartItems(items);
   if (!itemsValidation.valid) {
     const response: ApiResponse<null> = {
       success: false,
-      error: itemsValidation.errors.join(', ')
+      error: itemsValidation.errors.join(', '),
     };
     return res.status(400).json(response);
   }
 
-  // Validate delivery details
   const deliveryValidation = validateDeliveryDetails(deliveryDetails);
   if (!deliveryValidation.valid) {
     const response: ApiResponse<null> = {
       success: false,
-      error: deliveryValidation.errors.join(', ')
+      error: deliveryValidation.errors.join(', '),
     };
     return res.status(400).json(response);
   }
 
-  // Calculate total
   const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-  // Create order
-  const order = await orderStore.createOrder({
+  const order = orderStore.createOrder({
     items,
     total,
     deliveryDetails,
-    estimatedDelivery: '30-45 min'
+    estimatedDelivery: '30-45 min',
   });
 
   const response: ApiResponse<Order> = {
     success: true,
     data: order,
-    message: 'Order placed successfully'
+    message: 'Order placed successfully',
   };
 
   res.status(201).json(response);
 };
 
-// PUT /api/orders/:id/status - Update order status
-export const updateOrderStatus = async (req: Request, res: Response) => {
+export const updateOrderStatus = (req: Request, res: Response) => {
   const { id } = req.params;
   const { status } = req.body as UpdateOrderStatusRequest;
 
-  // Validate status
   const validStatuses = ['pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered'];
   if (!status || !validStatuses.includes(status)) {
     const response: ApiResponse<null> = {
       success: false,
-      error: 'Invalid status. Must be one of: ' + validStatuses.join(', ')
+      error: 'Invalid status. Must be one of: ' + validStatuses.join(', '),
     };
     return res.status(400).json(response);
   }
 
-  // Update status
-  const updatedOrder = await orderStore.updateOrderStatus(id, status);
+  const updatedOrder = orderStore.updateOrderStatus(id, status);
 
   if (!updatedOrder) {
     const response: ApiResponse<null> = {
       success: false,
-      error: 'Order not found or invalid status transition'
+      error: 'Order not found or invalid status transition',
     };
     return res.status(400).json(response);
   }
@@ -151,51 +139,49 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
   const response: ApiResponse<Order> = {
     success: true,
     data: updatedOrder,
-    message: 'Order status updated'
+    message: 'Order status updated',
   };
 
   res.json(response);
 };
 
-// GET /api/orders/:id/status-updates - Get status updates for an order
-export const getStatusUpdates = async (req: Request, res: Response) => {
+export const getStatusUpdates = (req: Request, res: Response) => {
   const { id } = req.params;
-  const order = await orderStore.getOrder(id);
+  const order = orderStore.getOrder(id);
 
   if (!order) {
     const response: ApiResponse<null> = {
       success: false,
-      error: 'Order not found'
+      error: 'Order not found',
     };
     return res.status(404).json(response);
   }
 
-  const updates = await orderStore.getStatusUpdates(id);
+  const updates = orderStore.getStatusUpdates(id);
 
   const response: ApiResponse<StatusUpdate[]> = {
     success: true,
-    data: updates
+    data: updates,
   };
 
   res.json(response);
 };
 
-// DELETE /api/orders/:id - Delete an order (for testing/admin)
-export const deleteOrder = async (req: Request, res: Response) => {
+export const deleteOrder = (req: Request, res: Response) => {
   const { id } = req.params;
-  const deleted = await orderStore.deleteOrder(id);
+  const deleted = orderStore.deleteOrder(id);
 
   if (!deleted) {
     const response: ApiResponse<null> = {
       success: false,
-      error: 'Order not found'
+      error: 'Order not found',
     };
     return res.status(404).json(response);
   }
 
   const response: ApiResponse<null> = {
     success: true,
-    message: 'Order deleted successfully'
+    message: 'Order deleted successfully',
   };
 
   res.json(response);

@@ -1,3 +1,2 @@
-import app from '../backend/src/server';
-
-export default app;
+// Deprecated for VPS deployment
+export default {};

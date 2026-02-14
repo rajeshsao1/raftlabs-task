@@ -10,6 +10,6 @@ router.get('/', getMenuItems);
 router.get('/categories', getCategories);
 
 // GET /api/menu/:id - Get single menu item
-router.get('/:id(\\d+)', getMenuItem);
+router.get('/:id', getMenuItem);
 
 export default router;

@@ -12,9 +12,7 @@ export interface ApiResponse<T> {
   message?: string;
 }
 
-const API_BASE_URL =
-  (import.meta as any).env?.VITE_API_BASE_URL ||
-  ((import.meta as any).env?.DEV ? 'http://localhost:3001/api' : '/api');
+const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:3001/api';
 
 // In a downloaded frontend-only setup, backend won't exist. We keep Option A working
 // by timing out quickly and letting the store fallback menu kick in.
