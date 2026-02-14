@@ -11,6 +11,15 @@ const corsOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map((origin) => origin.trim()).filter(Boolean)
   : null;
 
+function getHostname(value?: string): string | null {
+  if (!value) return null;
+  try {
+    return new URL(value).hostname.toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
 // Middleware
 app.use(cors({
   origin: (origin, callback) => {
@@ -19,7 +28,14 @@ app.use(cors({
       return;
     }
 
-    if (!origin || corsOrigins.includes(origin)) {
+    const allowedHostnames = corsOrigins.map((item) => getHostname(item)).filter(Boolean) as string[];
+    const originHostname = getHostname(origin);
+    const isAllowedVercelOrigin = !!originHostname && originHostname.endsWith('.vercel.app');
+    const isAllowedConfiguredOrigin =
+      (!!origin && corsOrigins.includes(origin)) ||
+      (!!originHostname && allowedHostnames.includes(originHostname));
+
+    if (!origin || isAllowedConfiguredOrigin || isAllowedVercelOrigin) {
       callback(null, true);
       return;
     }
