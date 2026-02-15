@@ -71,16 +71,7 @@ export const menuItems: MenuItem[] = [
     rating: 4.7,
     prepTime: '20-25 min'
   },
-  {
-    id: '8',
-    name: 'Chicken Wings',
-    description: 'Crispy wings tossed in your choice of buffalo, BBQ, or honey garlic',
-    price: 13.99,
-    image: 'https://images.unsplash.com/photo-1608039829572-fa24c4c2eeb6?w=500&h=500&fit=crop',
-    category: 'Appetizers',
-    rating: 4.6,
-    prepTime: '15-20 min'
-  },
+
   {
     id: '9',
     name: 'Beef Tacos',

@@ -75,12 +75,16 @@ describe('MenuCard Component', () => {
 
 describe('CategoryFilter Component', () => {
   const mockSetSelectedCategory = vi.fn();
+  const mockFetchCategories = vi.fn();
+  const mockCategories = ['All', 'Pizza', 'Burgers'];
 
   beforeEach(() => {
     vi.clearAllMocks();
     (useStore as any).mockImplementation(() => ({
       selectedCategory: 'All',
-      setSelectedCategory: mockSetSelectedCategory
+      setSelectedCategory: mockSetSelectedCategory,
+      categories: mockCategories,
+      fetchCategories: mockFetchCategories
     }));
   });
 
@@ -90,6 +94,7 @@ describe('CategoryFilter Component', () => {
     expect(screen.getByRole('button', { name: 'All' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Pizza' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Burgers' })).toBeInTheDocument();
+    expect(mockFetchCategories).toHaveBeenCalledTimes(1);
   });
 
   it('should call setSelectedCategory when category is clicked', async () => {
@@ -105,7 +110,9 @@ describe('CategoryFilter Component', () => {
   it('should highlight selected category', () => {
     (useStore as any).mockImplementation(() => ({
       selectedCategory: 'Pizza',
-      setSelectedCategory: mockSetSelectedCategory
+      setSelectedCategory: mockSetSelectedCategory,
+      categories: mockCategories,
+      fetchCategories: mockFetchCategories
     }));
     
     render(<CategoryFilter />);
